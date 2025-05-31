@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Formulario de Registro</title>
+  <style>
+    /* Reset y base */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    /* Contenedor del formulario */
+    form {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Grid para filas de campos */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .form-grid.two-col {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Cada campo */
+    .campo {
+      display: flex;
+      flex-direction: column;
+    }
+    .campo label {
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    .campo input,
+    .campo select {
+      padding: 8px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    /* Estilos de error */
+    input.error, select.error {
+      border-color: #e74c3c;
+      background-color: #fdecea;
+    }
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.85rem;
+      margin-top: 4px;
+      min-height: 1em;
+    }
+
+    /* Botones */
+    .botones {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .botones button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #btnCancelar {
+      background: #ccc;
+      color: #000;
+    }
+    #btnGuardar {
+      background: #27ae60;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <form id="formRegistro" novalidate>
+    <h1>Formulario de Registro</h1>
+
+    <!-- Fila 1: Nombre / RUT / Fecha -->
+    <div class="form-grid">
+      <div class="campo">
+        <label for="nombre">Nombre Completo *</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Nombre completo">
+        <small class="error-message"></small>
+      </div>
+      <div class="campo">
+        <label for="rut">RUT *</label>
+        <input type="text" id="rut" name="rut" placeholder="12.345.678-5">
+        <small class="error-message"></small>
+      </div>
+      <div class="campo">
+        <label for="fecha">Fecha de Nac. <small>(dd/MM/yyyy)</small></label>
+        <input type="text" id="fecha" name="fecha" placeholder="dd/MM/yyyy">
+        <small class="error-message"></small>
+      </div>
+    </div>
+
+    <!-- Fila 2: CV / Email / Género -->
+    <div class="form-grid">
+      <div class="campo">
+        <label for="cv">Currículum Vitae</label>
+        <input type="file" id="cv" name="cv" accept=".pdf,.docx">
+        <small class="error-message"></small>
+      </div>
+      <div class="campo">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="email" placeholder="usuario@servidor.algo">
+        <small class="error-message"></small>
+      </div>
+      <div class="campo">
+        <label for="genero">Género</label>
+        <select id="genero" name="genero">
+          <option value="">Seleccione...</option>
+          <option value="M">Masculino</option>
+          <option value="F">Femenino</option>
+        </select>
+        <small class="error-message"></small>
+      </div>
+    </div>
+
+    <!-- Fila 3: Contraseña / Repetir -->
+    <div class="form-grid two-col">
+      <div class="campo">
+        <label for="password">Contraseña *</label>
+        <input type="password" id="password" name="password">
+        <small class="error-message"></small>
+      </div>
+      <div class="campo">
+        <label for="repassword">Repetir Contraseña *</label>
+        <input type="password" id="repassword" name="repassword">
+        <small class="error-message"></small>
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="botones">
+      <button type="button" id="btnCancelar">Cancelar</button>
+      <button type="submit" id="btnGuardar">Guardar</button>
+    </div>
+  </form>
+
+  <script>
+    // Limpia errores visuales
+    function limpiarErrores() {
+      document.querySelectorAll('.error-message')
+              .forEach(el => el.textContent = '');
+      document.querySelectorAll('.error')
+              .forEach(i => i.classList.remove('error'));
+    }
+
+    // Marca un campo con error y pone el mensaje
+    function marcarError(input, msg) {
+      input.classList.add('error');
+      const err = input.parentElement.querySelector('.error-message');
+      err.textContent = msg;
+    }
+
+    // Función de validación general
+    function validarForm(e) {
+      e.preventDefault();
+      limpiarErrores();
+      let ok = true;
+      const form   = document.getElementById('formRegistro');
+      const nombre = form.nombre;
+      const rut    = form.rut;
+      const fecha  = form.fecha;
+      const cv     = form.cv;
+      const email  = form.email;
+      const pass   = form.password;
+      const repass = form.repassword;
+
+      // 1) Nombre
+      if (!nombre.value.trim()) {
+        marcarError(nombre, 'El nombre es obligatorio.');
+        ok = false;
+      }
+
+      // 2) RUT
+      const rutRe = /^[0-9]{1,2}\.?[0-9]{3}\.?[0-9]{3}-[0-9Kk]$/;
+      if (!rutRe.test(rut.value)) {
+        marcarError(rut, 'RUT inválido (ej. 12.345.678-5).');
+        ok = false;
+      }
+
+      // 3) Fecha (opcional)
+      if (fecha.value.trim()) {
+        const fRe = /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+        if (!fRe.test(fecha.value)) {
+          marcarError(fecha, 'Formato fecha: dd/MM/yyyy.');
+          ok = false;
+        }
+      }
+
+      // 4) CV
+      if (cv.files.length) {
+        const ext = cv.files[0].name.split('.').pop().toLowerCase();
+        if (!['pdf','docx'].includes(ext)) {
+          marcarError(cv, 'Solo PDF o DOCX.');
+          ok = false;
+        }
+      }
+
+      // 5) Email
+      if (!email.checkValidity()) {
+        marcarError(email, 'Correo electrónico inválido.');
+        ok = false;
+      }
+
+      // 6) Contraseña
+      const passRe = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,12}$/;
+      if (!passRe.test(pass.value)) {
+        marcarError(pass, '6–12 chars, mayúsculas, minúsculas y número.');
+        ok = false;
+      }
+
+      // 7) Repetir contraseña
+      if (repass.value !== pass.value) {
+        marcarError(repass, 'No coincide con la contraseña.');
+        ok = false;
+      }
+
+      if (ok) {
+        alert('¡Envío simulado con éxito!');
+        form.reset();
+        limpiarErrores();
+      }
+    }
+
+    // Asignar eventos al cargar la página
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('btnCancelar')
+              .addEventListener('click', () => {
+        document.getElementById('formRegistro').reset();
+        limpiarErrores();
+      });
+      document.getElementById('formRegistro')
+              .addEventListener('submit', validarForm);
+    });
+  </script>
+</body>
+</html>
